@@ -29,5 +29,9 @@ class Cube {
         // Top of cube
         drawTriangle3D( [0.0, 1.0, 0.0,  0.0, 1.0, 1.0,  1.0, 1.0, 1.0] );
         drawTriangle3D( [0.0, 1.0, 0.0,  1.0, 1.0, 1.0,  1.0, 1.0, 0.0] );
+
+        // Right side of cube
+        drawTriangle3D( [1.0, 0.0, 0.0,  1.0, 1.0, 1.0,  1.0, 0.0, 1.0] );
+        drawTriangle3D( [1.0, 0.0, 0.0,  1.0, 1.0, 0.0,  1.0, 1.0, 1.0] );
     }
 }

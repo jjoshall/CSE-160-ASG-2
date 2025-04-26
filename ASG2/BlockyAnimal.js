@@ -35,6 +35,8 @@ function setupWebGL() {
     console.log('Failed to get the rendering context for WebGL');
     return;
   }
+  
+  gl.enable(gl.DEPTH_TEST); // Enable depth test
 }
 
 function connectVariablesToGLSL() {
@@ -171,45 +173,6 @@ function click(ev) {
 
   point.position = [x, y];
   point.timestamp = performance.now();
-  
-  /// ChatGPT gave me some pointers with this portion 
-  if (g_spectrumDraw && velocity > 0) {
-    let speed = Math.min(velocity * 1000, 100);
-    point.size = Math.max(5, Math.min(30, speed));
-
-    let t = speed / 100;
-    point.color = [
-      t,
-      0.2,
-      1.0 - t,
-      g_selectedAlpha
-    ];
-  }
-  else {
-    point.color = g_selectedColor.slice();
-    point.size = g_selectedSize;
-  }
-  
-  /// ChatGPT helped me with this kaleidoscope math/code
-  if (g_kaleidoscopeMode) {
-    for (let i = 0; i < g_kaleidoscopeSegments; i++) {
-      const angle = (2 * Math.PI / g_kaleidoscopeSegments) * i;
-      const cosA = Math.cos(angle);
-      const sinA = Math.sin(angle);
-
-      const xRotated = x * cosA - y * sinA;
-      const yRotated = x * sinA + y * cosA;
-
-      let clone = Object.create(Object.getPrototypeOf(point));
-      Object.assign(clone, point);
-      clone.timestamp = performance.now();
-      clone.position = [xRotated, yRotated];
-      g_shapesList.push(clone);
-    }
-  } 
-  else {
-    g_shapesList.push(point);
-  }
 
   // Draw every shape that is supposed to be drawn
   renderAllShapes();
@@ -234,28 +197,31 @@ function renderAllShapes() {
   gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
   // Clear <canvas>
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   var body = new Cube();
   body.color = [1.0, 0.0, 0.0, 1.0];
-  body.matrix.translate(-.25, -.5, 0.0);
-  body.matrix.scale(0.5, 1.0, 0.5);
+  body.matrix.translate(-.25, -.75, 0.0);
+  body.matrix.rotate(-5, 1, 0, 0);
+  body.matrix.scale(0.5, 0.3, 0.5);
   body.render();
 
   // Draw a left arm
   var leftArm = new Cube();
   leftArm.color = [1.0, 1.0, 0.0, 1.0];
-  leftArm.matrix.setTranslate(0.7, 0.0, 0.0);
-  leftArm.matrix.rotate(45, 0, 0, 1);
+  leftArm.matrix.setTranslate(0, -0.5, 0.0);
+  leftArm.matrix.rotate(-5, 1, 0, 0);
+  leftArm.matrix.rotate(0, 0, 0, 1);
   leftArm.matrix.scale(0.25, 0.7, 0.5);
+  leftArm.matrix.translate(-0.5, 0, 0);
   leftArm.render();
 
   // Test box
   var box = new Cube();
   box.color = [1.0, 0.0, 1.0, 1.0];
-  box.matrix.translate(0, 0, -0.5, 0);
+  box.matrix.translate(-.1, .1, 0, 0);
   box.matrix.rotate(-30, 1, 0, 0);
-  box.matrix.scale(0.5, 0.5, 0.5);
+  box.matrix.scale(0.2, 0.4, 0.2);
   box.render();
 
   var duration = performance.now() - startTime;

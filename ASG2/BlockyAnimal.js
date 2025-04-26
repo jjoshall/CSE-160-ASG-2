@@ -2,11 +2,9 @@
 // Vertex shader program
 var VSHADER_SOURCE = `
   attribute vec4 a_Position;
-  uniform float u_Size;
+  uniform mat4 u_ModelMatrix;
   void main() {
-    gl_Position = a_Position;
-    //gl_PointSize = 10.0;
-    gl_PointSize = u_Size;
+    gl_Position = u_ModelMatrix * a_Position;
   }`
 
 // Fragment shader program
@@ -22,7 +20,8 @@ let canvas;
 let gl;
 let a_Position;
 let u_FragColor;
-let u_Size
+let u_Size;
+let u_ModelMatrix;
 
 function setupWebGL() {
   // Retrieve <canvas> element
@@ -58,12 +57,16 @@ function connectVariablesToGLSL() {
     return;
   }
 
-  // Get the storage location of u_Size
-  u_Size = gl.getUniformLocation(gl.program, 'u_Size');
-  if (!u_Size) {
-    console.log('Failed to get the storage location of u_Size');
+  // Get the storage location of u_ModelMatrix
+  u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
+  if (!u_ModelMatrix) {
+    console.log('Failed to get the storage location of u_ModelMatrix');
     return;
   }
+
+  // Set initial value for this matrix to identify
+  var identityM = new Matrix4();
+  gl.uniformMatrix4fv(u_ModelMatrix, false, identityM.elements);
 }
 
 // Constants
@@ -100,33 +103,33 @@ function addActionsForHtmlUI() {
   
   // Slider events
   document.getElementById('sizeSlide').addEventListener('mouseup', function() { g_selectedSize = this.value; });
-  document.getElementById('segmentSlide').addEventListener('mouseup', function() { g_seletcedSegment = this.value; });
-  document.getElementById('alphaSlide').addEventListener('mouseup', function() { 
-    g_selectedAlpha = this.value / 100;
-    g_selectedColor[3] = g_selectedAlpha;
-  });
+  // document.getElementById('segmentSlide').addEventListener('mouseup', function() { g_seletcedSegment = this.value; });
+  // document.getElementById('alphaSlide').addEventListener('mouseup', function() { 
+  //   g_selectedAlpha = this.value / 100;
+  //   g_selectedColor[3] = g_selectedAlpha;
+  // });
 
   // Toggle reference image display
-  document.getElementById('showRefButton').onclick = function() {
-    const refImage = document.getElementById('refImage');
-    if (refImage.style.display === 'block') {
-      refImage.style.display = 'none';
-    } else {
-      refImage.style.display = 'block';
-    }
-  }
+  // document.getElementById('showRefButton').onclick = function() {
+  //   const refImage = document.getElementById('refImage');
+  //   if (refImage.style.display === 'block') {
+  //     refImage.style.display = 'none';
+  //   } else {
+  //     refImage.style.display = 'block';
+  //   }
+  // }
 
-  // Recreate the reference image
-  document.getElementById('recreateButton').onclick = function() { drawReferenceTriangles(); }
+  // // Recreate the reference image
+  // document.getElementById('recreateButton').onclick = function() { drawReferenceTriangles(); }
 
-  // Spectrum drawing
-  document.getElementById('spectrumCheckbox').addEventListener('change', function() { g_spectrumDraw = this.checked; });
+  // // Spectrum drawing
+  // document.getElementById('spectrumCheckbox').addEventListener('change', function() { g_spectrumDraw = this.checked; });
 
-  document.getElementById('kaleidoscopeCheckbox').addEventListener('change', function() { g_kaleidoscopeMode = this.checked; });
+  // document.getElementById('kaleidoscopeCheckbox').addEventListener('change', function() { g_kaleidoscopeMode = this.checked; });
   
-  document.getElementById('replayButton').onclick = function() { replayDrawing(); };
+  // document.getElementById('replayButton').onclick = function() { replayDrawing(); };
 
-  document.getElementById('saveButton').onclick = function() { saveCanvasImage(); };
+  // document.getElementById('saveButton').onclick = function() { saveCanvasImage(); };
 }
 
 /// ChatGPT helped me with the saving functionality
@@ -415,21 +418,24 @@ function renderAllShapes() {
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT);
 
-  //var len = g_points.length;
-  // var len = g_shapesList.length;
-  
-  // for(var i = 0; i < len; i++) {
-  //   g_shapesList[i].render();
-  // }
-
   drawTriangle3D( [-1.0, 0.0, 0.0,  -0.5, -1.0, 0.0,  0.0, 0.0, 0.0] );
 
   var body = new Cube();
   body.color = [1.0, 0.0, 0.0, 1.0];
+  body.matrix.translate(-.25, -.5, 0.0);
+  body.matrix.scale(0.5, 1.0, 0.5);
   body.render();
 
+  // Draw a left arm
+  var leftArm = new Cube();
+  leftArm.color = [1.0, 1.0, 0.0, 1.0];
+  leftArm.matrix.setTranslate(0.7, 0.0, 0.0);
+  leftArm.matrix.rotate(45, 0, 0, 1);
+  leftArm.matrix.scale(0.25, 0.7, 0.5);
+  leftArm.render();
+
   var duration = performance.now() - startTime;
-  sendTextToHTML("numdot: " + len + " ms: " + Math.floor(duration) + " fps: " + Math.floor(1000/duration), "numdot");
+  sendTextToHTML("ms: " + Math.floor(duration) + " fps: " + Math.floor(1000/duration), "numdot");
 }
 
 function sendTextToHTML(text, htmlID) {

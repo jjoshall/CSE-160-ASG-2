@@ -89,6 +89,7 @@ let g_selectedColor = [1.0, 1.0, 1.0, 1.0];
 let g_selectedSize = 5.0;
 let g_seletcedType = POINT;
 let g_globalAngle = 0;
+let g_yellowAngle = 0;
 
 let g_seletcedSegment = 10;
 let g_selectedAlpha = 1.0;
@@ -100,21 +101,21 @@ let g_kaleidoscopeSegments = 6;
 
 function addActionsForHtmlUI() {
   // Button events (shape type)
-  document.getElementById('green').onclick = function() { g_selectedColor = [0.0, 1.0, 0.0, 1.0]; };
-  document.getElementById('red').onclick = function() { g_selectedColor = [1.0, 0.0, 0.0, 1.0]; };
-  document.getElementById('clearButton').onclick = function() { g_shapesList = []; renderAllShapes(); };
+  // document.getElementById('green').onclick = function() { g_selectedColor = [0.0, 1.0, 0.0, 1.0]; };
+  // document.getElementById('red').onclick = function() { g_selectedColor = [1.0, 0.0, 0.0, 1.0]; };
+  // document.getElementById('clearButton').onclick = function() { g_shapesList = []; renderAllShapes(); };
   
-  document.getElementById('pointButton').onclick = function() { g_seletcedType = POINT };
-  document.getElementById('triangleButton').onclick = function() { g_seletcedType = TRIANGLE };
-  document.getElementById('circleButton').onclick = function() { g_seletcedType = CIRCLE };
+  // document.getElementById('pointButton').onclick = function() { g_seletcedType = POINT };
+  // document.getElementById('triangleButton').onclick = function() { g_seletcedType = TRIANGLE };
+  // document.getElementById('circleButton').onclick = function() { g_seletcedType = CIRCLE };
 
   // Color slider events
-  document.getElementById('redSlide').addEventListener('mouseup', function() { g_selectedColor[0] = this.value / 100; });
-  document.getElementById('greenSlide').addEventListener('mouseup', function() { g_selectedColor[1] = this.value / 100; });
-  document.getElementById('blueSlide').addEventListener('mouseup', function() { g_selectedColor[2] = this.value / 100; });
+  // document.getElementById('redSlide').addEventListener('mouseup', function() { g_selectedColor[0] = this.value / 100; });
+  // document.getElementById('greenSlide').addEventListener('mouseup', function() { g_selectedColor[1] = this.value / 100; });
   
   // Slider events
-  document.getElementById('angleSlide').addEventListener('mousemove', function() { g_globalAngle = this.value; renderAllShapes(); }); 
+  document.getElementById('yellowSlide').addEventListener('mousemove', function() { g_yellowAngle = this.value; renderAllShapes(); });
+  document.getElementById('angleSlide').addEventListener('mousemove', function() { g_globalAngle = this.value; renderAllShapes(); });
 }
 
 function main() {
@@ -206,12 +207,12 @@ function renderAllShapes() {
   body.matrix.scale(0.5, 0.3, 0.5);
   body.render();
 
-  // Draw a left arm
+  // Draw a yellow left arm
   var leftArm = new Cube();
   leftArm.color = [1.0, 1.0, 0.0, 1.0];
   leftArm.matrix.setTranslate(0, -0.5, 0.0);
   leftArm.matrix.rotate(-5, 1, 0, 0);
-  leftArm.matrix.rotate(0, 0, 0, 1);
+  leftArm.matrix.rotate(-g_yellowAngle, 0, 0, 1);
   leftArm.matrix.scale(0.25, 0.7, 0.5);
   leftArm.matrix.translate(-0.5, 0, 0);
   leftArm.render();

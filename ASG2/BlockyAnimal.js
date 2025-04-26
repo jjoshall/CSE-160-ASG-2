@@ -129,54 +129,14 @@ function main() {
 
 var g_shapesList = []; // The array for the position of a mouse press
 
-function click(ev) {
-  // Extract the event click and return it in WebGL coordinates
-  let [x, y] = convertCoordinatesEventToGL(ev);
+// Called by browser repeatedly to update the display
+function tick() {
+  // Print some information to the console
+  console.log(performance.now());
 
-  /// ChatGPT helped me with this math
-  let currentTime = performance.now();
-  let velocity = 0;
+  renderAllShapes(); // Draw the shapes
 
-  if (g_lastMousePos && g_lastMouseTime) {
-    let dx = x - g_lastMousePos[0];
-    let dy = y - g_lastMousePos[1];
-    let dt = currentTime - g_lastMouseTime;
-    let dist = Math.sqrt(dx * dx + dy * dy);
-    velocity = dist / dt; // pixels/ms
-  }
-
-  g_lastMousePos = [x, y];
-  g_lastMouseTime = currentTime;
-
-  // Create and store a new point object
-  let point;
-  if (g_seletcedType == POINT) {
-    point = new Point();
-  }
-  else if (g_seletcedType == TRIANGLE) {
-    point = new Triangle();
-  }
-  else if (g_seletcedType == CIRCLE) {
-    point = new Circle();
-    point.segments = g_seletcedSegment;
-  }
-
-  point.position = [x, y];
-  point.timestamp = performance.now();
-
-  // Draw every shape that is supposed to be drawn
-  renderAllShapes();
-}
-
-function convertCoordinatesEventToGL(ev) {
-  var x = ev.clientX; // x coordinate of a mouse pointer
-  var y = ev.clientY; // y coordinate of a mouse pointer
-  var rect = ev.target.getBoundingClientRect();
-
-  x = ((x - rect.left) - canvas.width/2)/(canvas.width/2);
-  y = (canvas.height/2 - (y - rect.top))/(canvas.height/2);
-
-  return([x, y]);
+  requestAnimationFrame(tick); // Request that the browser calls tick
 }
 
 function renderAllShapes() {
@@ -229,4 +189,54 @@ function sendTextToHTML(text, htmlID) {
     return;
   }
   htmlElm.innerHTML = text;
+}
+
+function click(ev) {
+  // Extract the event click and return it in WebGL coordinates
+  let [x, y] = convertCoordinatesEventToGL(ev);
+
+  /// ChatGPT helped me with this math
+  let currentTime = performance.now();
+  let velocity = 0;
+
+  if (g_lastMousePos && g_lastMouseTime) {
+    let dx = x - g_lastMousePos[0];
+    let dy = y - g_lastMousePos[1];
+    let dt = currentTime - g_lastMouseTime;
+    let dist = Math.sqrt(dx * dx + dy * dy);
+    velocity = dist / dt; // pixels/ms
+  }
+
+  g_lastMousePos = [x, y];
+  g_lastMouseTime = currentTime;
+
+  // Create and store a new point object
+  let point;
+  if (g_seletcedType == POINT) {
+    point = new Point();
+  }
+  else if (g_seletcedType == TRIANGLE) {
+    point = new Triangle();
+  }
+  else if (g_seletcedType == CIRCLE) {
+    point = new Circle();
+    point.segments = g_seletcedSegment;
+  }
+
+  point.position = [x, y];
+  point.timestamp = performance.now();
+
+  // Draw every shape that is supposed to be drawn
+  renderAllShapes();
+}
+
+function convertCoordinatesEventToGL(ev) {
+  var x = ev.clientX; // x coordinate of a mouse pointer
+  var y = ev.clientY; // y coordinate of a mouse pointer
+  var rect = ev.target.getBoundingClientRect();
+
+  x = ((x - rect.left) - canvas.width/2)/(canvas.width/2);
+  y = (canvas.height/2 - (y - rect.top))/(canvas.height/2);
+
+  return([x, y]);
 }

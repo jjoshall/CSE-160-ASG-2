@@ -124,15 +124,17 @@ function main() {
   // Specify the color for clearing <canvas>
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
-  renderAllShapes(); // Draw the initial shapes
+  //renderAllShapes(); // Draw the initial shapes
+  requestAnimationFrame(tick); // Start the tick function
 }
 
-var g_shapesList = []; // The array for the position of a mouse press
+var g_startTime = performance.now() / 1000.0; // Start time in seconds
+var g_seconds = performance.now() / 1000.0 - g_startTime; // Time in seconds
 
 // Called by browser repeatedly to update the display
 function tick() {
-  // Print some information to the console
-  console.log(performance.now());
+  g_seconds = performance.now() / 1000.0 - g_startTime; // Update time in seconds
+  console.log(g_seconds);
 
   renderAllShapes(); // Draw the shapes
 
@@ -148,6 +150,7 @@ function renderAllShapes() {
 
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.clear(gl.COLOR_BUFFER_BIT);
 
   // Red body
   var body = new Cube();
@@ -157,16 +160,17 @@ function renderAllShapes() {
   body.matrix.scale(0.5, 0.3, 0.5);
   body.render();
 
-  // Draw a yellow left arm
-  var leftArm = new Cube();
-  leftArm.color = [1.0, 1.0, 0.0, 1.0];
-  leftArm.matrix.setTranslate(0, -0.5, 0.0);
-  leftArm.matrix.rotate(-5, 1, 0, 0);
-  leftArm.matrix.rotate(-g_yellowAngle, 0, 0, 1);
-  var yellowCoordinatesMat = new Matrix4(leftArm.matrix);
-  leftArm.matrix.scale(0.25, 0.7, 0.5);
-  leftArm.matrix.translate(-0.5, 0, 0);
-  leftArm.render();
+  // Draw a yellow arm
+  var yellow = new Cube();
+  yellow.color = [1.0, 1.0, 0.0, 1.0];
+  yellow.matrix.setTranslate(0, -0.5, 0.0);
+  yellow.matrix.rotate(-5, 1, 0, 0);
+  //yellow.matrix.rotate(-g_yellowAngle, 0, 0, 1);
+  yellow.matrix.rotate(45 * Math.sin(g_seconds), 0, 0, 1);
+  var yellowCoordinatesMat = new Matrix4(yellow.matrix);
+  yellow.matrix.scale(0.25, 0.7, 0.5);
+  yellow.matrix.translate(-0.5, 0, 0);
+  yellow.render();
 
   // Purple box
   var box = new Cube();
@@ -190,6 +194,8 @@ function sendTextToHTML(text, htmlID) {
   }
   htmlElm.innerHTML = text;
 }
+
+var g_shapesList = []; // The array for the position of a mouse press
 
 function click(ev) {
   // Extract the event click and return it in WebGL coordinates

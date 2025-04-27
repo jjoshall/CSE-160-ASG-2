@@ -89,21 +89,21 @@ let g_selectedColor = [1.0, 1.0, 1.0, 1.0];
 let g_selectedSize = 5.0;
 let g_seletcedType = POINT;
 let g_globalAngle = 0;
-let g_yellowAngle = 0;
-let g_magentaAngle = 0;
-let g_yellowAnimation = false;
-let g_magentaAnimation = false;
+let g_wingsAngle = 0;
+let g_lowerBeakAngle = 0;
+let g_wingsAnimation = false;
+let g_lowerBeakAnimation = false;
 
 function addActionsForHtmlUI() {
   // Button events
-  document.getElementById('animationMagentaOffButton').onclick = function() { g_magentaAnimation = false; };
-  document.getElementById('animationMagentaOnButton').onclick = function() { g_magentaAnimation = true; };
-  document.getElementById('animationYellowOffButton').onclick = function() { g_yellowAnimation = false; };
-  document.getElementById('animationYellowOnButton').onclick = function() { g_yellowAnimation = true; };
+  document.getElementById('animationLowerBeakOffButton').onclick = function() { g_lowerBeakAnimation = false; };
+  document.getElementById('animationLowerBeakOnButton').onclick = function() { g_lowerBeakAnimation = true; };
+  document.getElementById('animationWingsOffButton').onclick = function() { g_wingsAnimation = false; };
+  document.getElementById('animationWingsOnButton').onclick = function() { g_wingsAnimation = true; };
 
   // Slider events
-  document.getElementById('magentaSlide').addEventListener('mousemove', function() { g_magentaAngle = this.value; renderAllShapes(); });
-  document.getElementById('yellowSlide').addEventListener('mousemove', function() { g_yellowAngle = this.value; renderAllShapes(); });
+  document.getElementById('lowerBeakSlide').addEventListener('mousemove', function() { g_lowerBeakAngle = this.value; renderAllShapes(); });
+  document.getElementById('wingsSlide').addEventListener('mousemove', function() { g_wingsAngle = this.value; renderAllShapes(); });
   document.getElementById('angleSlide').addEventListener('mousemove', function() { g_globalAngle = this.value; renderAllShapes(); });
 }
 
@@ -122,9 +122,8 @@ function main() {
   canvas.onmousemove = function(ev) { if (ev.buttons == 1) click(ev); };
 
   // Specify the color for clearing <canvas>
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);
+  gl.clearColor(0, 0, 0.5, 0.2);
 
-  //renderAllShapes(); // Draw the initial shapes
   requestAnimationFrame(tick); // Start the tick function
 }
 
@@ -145,12 +144,20 @@ function tick() {
 
 // Update the angles of everything if currently animating
 function updateAnimationAngles() {
-  if (g_yellowAnimation) {
-    g_yellowAngle = 45 * Math.sin(g_seconds);
+  // if (g_yellowAnimation) {
+  //   g_yellowAngle = 45 * Math.sin(g_seconds);
+  // }
+
+  // if (g_magentaAnimation) {
+  //   g_magentaAngle = 45 * Math.sin(3 * g_seconds);
+  // }
+
+  if (g_wingsAnimation) {
+    g_wingsAngle = Math.max(0, 45 * Math.sin(4 * g_seconds));
   }
 
-  if (g_magentaAnimation) {
-    g_magentaAngle = 45 * Math.sin(3 * g_seconds);
+  if (g_lowerBeakAnimation) {
+    g_lowerBeakAngle = 45 * Math.sin(3 * g_seconds);
   }
 }
 
@@ -165,35 +172,133 @@ function renderAllShapes() {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.clear(gl.COLOR_BUFFER_BIT);
 
-  // Red body
+  // Left Leg
+  var leftLeg = new Cube();
+  leftLeg.color = [0.9, 0.7, 0, 1.0];
+  leftLeg.matrix.translate(-.2, -.7, 0.0);
+  leftLeg.matrix.rotate(0, 1, 0, 0);
+  leftLeg.matrix.scale(0.1, 0.3, 0.05);
+  leftLeg.render();
+
+  // Right Leg
+  var rightLeg = new Cube();
+  rightLeg.color = [0.9, 0.7, 0, 1.0];
+  rightLeg.matrix.translate(0.1, -.7, 0.0);
+  rightLeg.matrix.rotate(0, 1, 0, 0);
+  rightLeg.matrix.scale(0.1, 0.3, 0.05);
+  rightLeg.render();
+
+  // Right Foot
+  var rightFoot = new Cube();
+  rightFoot.color = [0.9, 0.7, 0, 1.0];
+  rightFoot.matrix.translate(0.05, -.7, 0.1);
+  rightFoot.matrix.rotate(0, 1, 0, 0);
+  rightFoot.matrix.scale(0.2, 0.02, -0.3);
+  rightFoot.render();
+
+  // Left Foot
+  var leftFoot = new Cube();
+  leftFoot.color = [0.9, 0.7, 0, 1.0];
+  leftFoot.matrix.translate(-.25, -.7, 0.1);
+  leftFoot.matrix.rotate(0, 1, 0, 0);
+  leftFoot.matrix.scale(0.2, 0.02, -0.3);
+  leftFoot.render();
+
+  // Gray body
   var body = new Cube();
-  body.color = [1.0, 0.0, 0.0, 1.0];
-  body.matrix.translate(-.25, -.75, 0.0);
-  body.matrix.rotate(-5, 1, 0, 0);
-  body.matrix.scale(0.5, 0.3, 0.5);
+  body.color = [0.8, 0.8, 0.8, 1.0];
+  body.matrix.translate(-.25, -.4, -0.4);
+  body.matrix.rotate(0, 1, 0, 0);
+  body.matrix.scale(0.5, 0.5, 0.7);
   body.render();
 
-  // Draw a yellow arm
-  var yellow = new Cube();
-  yellow.color = [1.0, 1.0, 0.0, 1.0];
-  yellow.matrix.setTranslate(0, -0.5, 0.0);
-  yellow.matrix.rotate(-5, 1, 0, 0);
+  // Right wing
+  var rightWing = new Cube();
+  rightWing.color = [0.6, 0.6, 0.6, 1.0];
+  rightWing.matrix.translate(0.25, -.23, -0.3);
+  rightWing.matrix.translate(0, -0.165, 0);
+  rightWing.matrix.rotate(-g_wingsAngle, 0, 0, 1);
+  rightWing.matrix.translate(0, 0.165, 0);
+  rightWing.matrix.scale(0.07, 0.33, 0.5);
+  rightWing.render();
 
-  yellow.matrix.rotate(g_yellowAngle, 0, 0, 1);
-  var yellowCoordinatesMat = new Matrix4(yellow.matrix);
-  yellow.matrix.scale(0.25, 0.7, 0.5);
-  yellow.matrix.translate(-0.5, 0, 0);
-  yellow.render();
+  // Left wing
+  var leftWing = new Cube();
+  leftWing.color = [0.6, 0.6, 0.6, 1.0];
+  leftWing.matrix.translate(-0.32, -.23, -0.3);
+  leftWing.matrix.rotate(0, 1, 0, 0);
+  leftWing.matrix.scale(0.07, 0.33, 0.5);
+  leftWing.render();
+
+  // Head
+  var head = new Cube();
+  head.color = [0.9, 0.9, 0.9, 1.0];
+  head.matrix.translate(-0.15, 0.03, -0.6);
+  head.matrix.rotate(0, 1, 0, 0);
+  head.matrix.scale(0.3, 0.43, 0.27);
+  head.render();
+
+  // Beak upper
+  var beakUpper = new Cube();
+  beakUpper.color = [1.0, 0.6, 0.0, 1.0];
+  beakUpper.matrix.translate(-.15, 0.23, -0.75);
+  beakUpper.matrix.rotate(0, 1, 0, 0);
+  beakUpper.matrix.scale(0.2999, 0.05, 0.3);
+  beakUpper.render();
+
+  // Beak lower
+  var beakLower = new Cube();
+  beakLower.color = [0.8, 0.5, 0.0, 1.0];
+  beakLower.matrix.translate(-.15, 0.18, -0.75);
+  beakLower.matrix.rotate(0, 1, 0, 0);
+  beakLower.matrix.scale(0.2999, 0.05, 0.3);
+  beakLower.render();
+
+  // Gizzard
+  var gizzard = new Cube();
+  gizzard.color = [1.0, 0, 0.0, 1.0];
+  gizzard.matrix.translate(-.07, 0.04, -0.7);
+  gizzard.matrix.rotate(0, 1, 0, 0);
+  gizzard.matrix.scale(0.13, 0.15, 0.1);
+  gizzard.render();
+
+  // Left eye
+  var leftEye = new Cube();
+  leftEye.color = [0.0, 0.0, 0.0, 1.0];
+  leftEye.matrix.translate(-0.15, 0.28, -0.602);
+  leftEye.matrix.rotate(0, 1, 0, 0);
+  leftEye.matrix.scale(0.08, 0.08, 0.01);
+  leftEye.render();
+
+  // Right eye
+  var rightEye = new Cube();
+  rightEye.color = [0.0, 0.0, 0.0, 1.0];
+  rightEye.matrix.translate(.07, 0.28, -0.602);
+  rightEye.matrix.rotate(0, 1, 0, 0);
+  rightEye.matrix.scale(0.08, 0.08, 0.01);
+  rightEye.render();
+
+  // Draw a yellow arm
+  // var yellow = new Cube();
+  // yellow.color = [1.0, 1.0, 0.0, 1.0];
+  // yellow.matrix.setTranslate(0, -0.5, 0.0);
+  // yellow.matrix.rotate(-5, 1, 0, 0);
+
+  // yellow.matrix.rotate(g_yellowAngle, 0, 0, 1);
+  // var yellowCoordinatesMat = new Matrix4(yellow.matrix);
+  // yellow.matrix.scale(0.25, 0.7, 0.5);
+  // yellow.matrix.translate(-0.5, 0, 0);
+  // yellow.render();
 
   // Purple box
-  var box = new Cube();
-  box.color = [1.0, 0.0, 1.0, 1.0];
-  box.matrix = yellowCoordinatesMat;
-  box.matrix.translate(0, .65, 0);
-  box.matrix.rotate(-g_magentaAngle, 0, 0, 1);
-  box.matrix.scale(0.3, 0.3, 0.3);
-  box.matrix.translate(-0.5, 0, -0.001);
-  box.render();
+  // var box = new Cube();
+  // box.color = [1.0, 0.0, 1.0, 1.0];
+  // box.matrix = yellowCoordinatesMat;
+  // box.matrix.translate(0, .65, 0);
+  // box.matrix.rotate(-g_magentaAngle, 0, 0, 1);
+  // box.matrix.scale(0.3, 0.3, 0.3);
+  // box.matrix.translate(-0.5, 0, -0.001);
+  // box.render();
 
   var duration = performance.now() - startTime;
   sendTextToHTML("ms: " + Math.floor(duration) + " fps: " + Math.floor(1000/duration), "numdot");

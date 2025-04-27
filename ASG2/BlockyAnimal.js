@@ -91,16 +91,16 @@ let g_seletcedType = POINT;
 let g_globalAngle = 0;
 let g_yellowAngle = 0;
 let g_magentaAngle = 0;
-
-let g_seletcedSegment = 10;
-let g_selectedAlpha = 1.0;
-let g_spectrumDraw = false;
-let g_lastMousePos = null;
-let g_lastMouseTime = null;
-let g_kaleidoscopeMode = false;
-let g_kaleidoscopeSegments = 6;
+let g_yellowAnimation = false;
+let g_magentaAnimation = false;
 
 function addActionsForHtmlUI() {
+  // Button events
+  document.getElementById('animationMagentaOffButton').onclick = function() { g_magentaAnimation = false; };
+  document.getElementById('animationMagentaOnButton').onclick = function() { g_magentaAnimation = true; };
+  document.getElementById('animationYellowOffButton').onclick = function() { g_yellowAnimation = false; };
+  document.getElementById('animationYellowOnButton').onclick = function() { g_yellowAnimation = true; };
+
   // Slider events
   document.getElementById('magentaSlide').addEventListener('mousemove', function() { g_magentaAngle = this.value; renderAllShapes(); });
   document.getElementById('yellowSlide').addEventListener('mousemove', function() { g_yellowAngle = this.value; renderAllShapes(); });
@@ -134,11 +134,24 @@ var g_seconds = performance.now() / 1000.0 - g_startTime; // Time in seconds
 // Called by browser repeatedly to update the display
 function tick() {
   g_seconds = performance.now() / 1000.0 - g_startTime; // Update time in seconds
-  console.log(g_seconds);
+  
+  // Update the angles of everything if currently animating
+  updateAnimationAngles();
 
   renderAllShapes(); // Draw the shapes
 
   requestAnimationFrame(tick); // Request that the browser calls tick
+}
+
+// Update the angles of everything if currently animating
+function updateAnimationAngles() {
+  if (g_yellowAnimation) {
+    g_yellowAngle = 45 * Math.sin(g_seconds);
+  }
+
+  if (g_magentaAnimation) {
+    g_magentaAngle = 45 * Math.sin(3 * g_seconds);
+  }
 }
 
 function renderAllShapes() {
@@ -165,8 +178,8 @@ function renderAllShapes() {
   yellow.color = [1.0, 1.0, 0.0, 1.0];
   yellow.matrix.setTranslate(0, -0.5, 0.0);
   yellow.matrix.rotate(-5, 1, 0, 0);
-  //yellow.matrix.rotate(-g_yellowAngle, 0, 0, 1);
-  yellow.matrix.rotate(45 * Math.sin(g_seconds), 0, 0, 1);
+
+  yellow.matrix.rotate(g_yellowAngle, 0, 0, 1);
   var yellowCoordinatesMat = new Matrix4(yellow.matrix);
   yellow.matrix.scale(0.25, 0.7, 0.5);
   yellow.matrix.translate(-0.5, 0, 0);

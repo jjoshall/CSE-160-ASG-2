@@ -88,11 +88,28 @@ const CIRCLE = 2;
 let g_selectedColor = [1.0, 1.0, 1.0, 1.0];
 let g_selectedSize = 5.0;
 let g_seletcedType = POINT;
-let g_globalAngle = 0;
+let g_globalAngleX = 0;
+let g_globalAngleY = 0;
+let g_isDragging = false;
+let g_lastMouseX = null;
+let g_lastMouseY = null;
 let g_wingsAngle = 0;
 let g_lowerBeakAngle = 0;
+let g_leftThighAngle = 0;
+let g_leftCalfAngle = 0;
+let g_leftFootAngle = 0;
+let g_rightThighAngle = 0;
+let g_rightCalfAngle = 0;
+let g_rightFootAngle = 0;
+let g_eyesScale = 0;
 let g_wingsAnimation = false;
 let g_lowerBeakAnimation = false;
+let g_leftLegAnimation = false;
+let g_leftFootAnimation = false;
+let g_rightLegAnimation = false;
+let g_rightFootAnimation = false;
+let g_shiverAnimation = false;
+let g_shiverStartTime = 0;
 
 function addActionsForHtmlUI() {
   // Button events
@@ -100,11 +117,24 @@ function addActionsForHtmlUI() {
   document.getElementById('animationLowerBeakOnButton').onclick = function() { g_lowerBeakAnimation = true; };
   document.getElementById('animationWingsOffButton').onclick = function() { g_wingsAnimation = false; };
   document.getElementById('animationWingsOnButton').onclick = function() { g_wingsAnimation = true; };
+  document.getElementById('animationLeftLegOffButton').onclick = function() { g_leftLegAnimation = false; };
+  document.getElementById('animationLeftLegOnButton').onclick = function() { g_leftLegAnimation = true; };
+  document.getElementById('animationRightLegOffButton').onclick = function() { g_rightLegAnimation = false; };
+  document.getElementById('animationRightLegOnButton').onclick = function() { g_rightLegAnimation = true; };
+  document.getElementById('animationLeftFootOffButton').onclick = function() { g_leftFootAnimation = false; };
+  document.getElementById('animationLeftFootOnButton').onclick = function() { g_leftFootAnimation = true; };
+  document.getElementById('animationRightFootOffButton').onclick = function() { g_rightFootAnimation = false; };
+  document.getElementById('animationRightFootOnButton').onclick = function() { g_rightFootAnimation = true; };
 
   // Slider events
   document.getElementById('lowerBeakSlide').addEventListener('mousemove', function() { g_lowerBeakAngle = this.value; renderAllShapes(); });
   document.getElementById('wingsSlide').addEventListener('mousemove', function() { g_wingsAngle = this.value; renderAllShapes(); });
-  document.getElementById('angleSlide').addEventListener('mousemove', function() { g_globalAngle = this.value; renderAllShapes(); });
+  document.getElementById('leftThighSlide').addEventListener('mousemove', function() { g_leftThighAngle = this.value; renderAllShapes(); });
+  document.getElementById('rightThighSlide').addEventListener('mousemove', function() { g_rightThighAngle = this.value; renderAllShapes(); });
+  document.getElementById('leftFootSlide').addEventListener('mousemove', function() { g_leftFootAngle = this.value; renderAllShapes(); });
+  document.getElementById('rightFootSlide').addEventListener('mousemove', function() { g_rightFootAngle = this.value; renderAllShapes(); });
+  document.getElementById('leftCalfSlide').addEventListener('mousemove', function() { g_leftCalfAngle = this.value; renderAllShapes(); });
+  document.getElementById('rightCalfSlide').addEventListener('mousemove', function() { g_rightCalfAngle = this.value; renderAllShapes(); });
 }
 
 function main() {
@@ -120,6 +150,37 @@ function main() {
   canvas.onmousedown = click;
   // canvas.onmousemove = click;
   canvas.onmousemove = function(ev) { if (ev.buttons == 1) click(ev); };
+
+  /// ChatGPT helped me with this camera rotation code
+  canvas.addEventListener('mousedown', function(ev) {
+    g_isDragging = true;
+    g_lastMouseX = ev.clientX;
+    g_lastMouseY = ev.clientY;
+
+    if (ev.shiftKey) {
+      g_shiverAnimation = true;
+      g_shiverStartTime = performance.now() / 1000.0; // Start time in seconds
+    }
+  });
+
+  canvas.addEventListener('mouseup', function(ev) {
+    g_isDragging = false;
+  });
+
+  canvas.addEventListener('mousemove', function(ev) {
+    if (g_isDragging) {
+      let dx = ev.clientX - g_lastMouseX;
+      let dy = ev.clientY - g_lastMouseY;
+      g_globalAngleX += (dx * 0.5);
+      g_globalAngleY += (dy * 0.5);
+
+      g_globalAngleY = Math.max(-90, Math.min(90, g_globalAngleY));
+
+      g_lastMouseX = ev.clientX;
+      g_lastMouseY = ev.clientY;
+      renderAllShapes(); // Draw the shapes
+    }
+  });
 
   // Specify the color for clearing <canvas>
   gl.clearColor(0, 0, 0.5, 0.2);
@@ -144,65 +205,130 @@ function tick() {
 
 // Update the angles of everything if currently animating
 function updateAnimationAngles() {
-  // if (g_yellowAnimation) {
-  //   g_yellowAngle = 45 * Math.sin(g_seconds);
-  // }
-
-  // if (g_magentaAnimation) {
-  //   g_magentaAngle = 45 * Math.sin(3 * g_seconds);
-  // }
-
+  if (g_shiverAnimation) {
+    let elapsed = g_seconds - g_shiverStartTime;
+    
+    /// Asked ChatGPT for help on just the shiver part (changing g_globalAngleX) of the animation
+    if (elapsed > 2) {
+      g_shiverAnimation = false; // Stop the animation after 1 second
+    }
+    else {
+      g_globalAngleX += Math.sin(g_seconds * 5) * 5; // Shiver effect
+      // shake legs
+      g_leftThighAngle += Math.sin(g_seconds * 20) * 5;
+      g_rightThighAngle += -Math.sin(g_seconds * 20) * 5;
+      // shake wings
+      g_wingsAngle = Math.max(0, 90 * Math.sin(10 * g_seconds)); 
+    }
+  }
+  
   if (g_wingsAnimation) {
     g_wingsAngle = Math.max(0, 45 * Math.sin(4 * g_seconds));
   }
 
   if (g_lowerBeakAnimation) {
-    g_lowerBeakAngle = 45 * Math.sin(3 * g_seconds);
+    g_lowerBeakAngle = Math.min(0, Math.max(-5, 45 * Math.sin(2.5 * g_seconds)));
+  }
+
+  if (g_leftLegAnimation) {
+    g_leftThighAngle = Math.max(-50, Math.min(50, 45 * Math.sin(2.5 * g_seconds)));
+  }
+
+  if (g_rightLegAnimation) {
+    g_rightThighAngle = Math.max(-50, Math.min(50, -45 * Math.sin(2.5 * g_seconds)));
+  }
+
+  if (g_leftFootAnimation) {
+    g_leftFootAngle = Math.max(-10, Math.min(0, 45 * Math.sin(2.5 * g_seconds)));
+  }
+  
+  if (g_rightFootAnimation) {
+    g_rightFootAngle = Math.max(-10, Math.min(0, -45 * Math.sin(2.5 * g_seconds)));
+  }  
+
+  // ChatGPT helped me with the blinking animation
+  let blink = Math.abs(Math.sin(2 * g_seconds));
+
+  if (blink > 0.9) {
+    g_eyesScale = 0.01 + (0.07 * (1.0 - blink) * 10.0);
+  } 
+  else {
+    g_eyesScale = 0.08;
   }
 }
 
 function renderAllShapes() {
   var startTime = performance.now();
   
+  /// ChatGPT helped me with the global rotation matrix
   // Pass the matrix to u_ModelMatrix variable
-  var globalRotMat = new Matrix4().rotate(g_globalAngle, 0, 1, 0);
+  var globalRotMat = new Matrix4().rotate(g_globalAngleX, 0, 1, 0);
+  globalRotMat.rotate(g_globalAngleY, 1, 0, 0);
   gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.clear(gl.COLOR_BUFFER_BIT);
 
-  // Left Leg
-  var leftLeg = new Cube();
-  leftLeg.color = [0.9, 0.7, 0, 1.0];
-  leftLeg.matrix.translate(-.2, -.7, 0.0);
-  leftLeg.matrix.rotate(0, 1, 0, 0);
-  leftLeg.matrix.scale(0.1, 0.3, 0.05);
-  leftLeg.render();
+  // Left thigh
+  var leftThigh = new Cube();
+  leftThigh.color = [0.9, 0.7, 0, 1.0];
+  leftThigh.matrix.translate(-.1, -.35, 0.0);
+  leftThigh.matrix.rotate(180, 0, 0, 1);
+  leftThigh.matrix.rotate(g_leftThighAngle, 1, 0, 0);
+  var leftThighCoordinatesMat = new Matrix4(leftThigh.matrix);
+  leftThigh.matrix.scale(0.1, 0.175, 0.05);
+  leftThigh.render();
 
-  // Right Leg
-  var rightLeg = new Cube();
-  rightLeg.color = [0.9, 0.7, 0, 1.0];
-  rightLeg.matrix.translate(0.1, -.7, 0.0);
-  rightLeg.matrix.rotate(0, 1, 0, 0);
-  rightLeg.matrix.scale(0.1, 0.3, 0.05);
-  rightLeg.render();
-
-  // Right Foot
-  var rightFoot = new Cube();
-  rightFoot.color = [0.9, 0.7, 0, 1.0];
-  rightFoot.matrix.translate(0.05, -.7, 0.1);
-  rightFoot.matrix.rotate(0, 1, 0, 0);
-  rightFoot.matrix.scale(0.2, 0.02, -0.3);
-  rightFoot.render();
+  // Left calf
+  var leftCalf = new Cube();
+  leftCalf.color = [0.9, 0.7, 0, 1.0];
+  leftCalf.matrix = leftThighCoordinatesMat;
+  leftCalf.matrix.translate(0.0, .175, 0.0);
+  leftCalf.matrix.rotate(g_leftCalfAngle, 1, 0, 0);
+  var leftCalfCoordinatesMat = new Matrix4(leftCalf.matrix);
+  leftCalf.matrix.scale(0.1, 0.175, 0.05);
+  leftCalf.render();
 
   // Left Foot
   var leftFoot = new Cube();
   leftFoot.color = [0.9, 0.7, 0, 1.0];
-  leftFoot.matrix.translate(-.25, -.7, 0.1);
-  leftFoot.matrix.rotate(0, 1, 0, 0);
-  leftFoot.matrix.scale(0.2, 0.02, -0.3);
+  leftFoot.matrix = leftCalfCoordinatesMat;
+  leftFoot.matrix.translate(.15, .155, .1);
+  leftFoot.matrix.rotate(180, 0, 1, 0);
+  leftFoot.matrix.rotate(g_leftFootAngle, 1, 0, 0);
+  leftFoot.matrix.scale(.2, .02, .3);
   leftFoot.render();
+
+  // Right thigh
+  var rightThigh = new Cube();
+  rightThigh.color = [0.9, 0.7, 0, 1.0];
+  rightThigh.matrix.translate(0.2, -.35, 0.0);
+  rightThigh.matrix.rotate(180, 0, 0, 1);
+  rightThigh.matrix.rotate(g_rightThighAngle, 1, 0, 0);
+  var rightThighCoordinatesMat = new Matrix4(rightThigh.matrix);
+  rightThigh.matrix.scale(0.1, 0.175, 0.05);
+  rightThigh.render();
+
+  // Right calf
+  var rightCalf = new Cube();
+  rightCalf.color = [0.9, 0.7, 0, 1.0];
+  rightCalf.matrix = rightThighCoordinatesMat;
+  rightCalf.matrix.translate(0.0, .175, 0.0);
+  rightCalf.matrix.rotate(g_rightCalfAngle, 1, 0, 0);
+  var rightCalfCoordinatesMat = new Matrix4(rightCalf.matrix);
+  rightCalf.matrix.scale(0.1, 0.175, 0.05);
+  rightCalf.render();
+
+  // Right Foot
+  var rightFoot = new Cube();
+  rightFoot.color = [0.9, 0.7, 0, 1.0];
+  rightFoot.matrix = rightCalfCoordinatesMat;
+  rightFoot.matrix.translate(.15, .155, .1);
+  rightFoot.matrix.rotate(180, 0, 1, 0);
+  rightFoot.matrix.rotate(g_rightFootAngle, 1, 0, 0);
+  rightFoot.matrix.scale(.2, .02, .3);
+  rightFoot.render();
 
   // Gray body
   var body = new Cube();
@@ -215,18 +341,18 @@ function renderAllShapes() {
   // Right wing
   var rightWing = new Cube();
   rightWing.color = [0.6, 0.6, 0.6, 1.0];
-  rightWing.matrix.translate(0.25, -.23, -0.3);
-  rightWing.matrix.translate(0, -0.165, 0);
+  rightWing.matrix.translate(0.25, 0.1, 0.25);
+  rightWing.matrix.rotate(180, 1, 0, 0);
   rightWing.matrix.rotate(-g_wingsAngle, 0, 0, 1);
-  rightWing.matrix.translate(0, 0.165, 0);
   rightWing.matrix.scale(0.07, 0.33, 0.5);
   rightWing.render();
 
   // Left wing
   var leftWing = new Cube();
   leftWing.color = [0.6, 0.6, 0.6, 1.0];
-  leftWing.matrix.translate(-0.32, -.23, -0.3);
-  leftWing.matrix.rotate(0, 1, 0, 0);
+  leftWing.matrix.translate(-0.25, .1, -0.25);
+  leftWing.matrix.rotate(180, 0, 0, 1);
+  leftWing.matrix.rotate(-g_wingsAngle, 0, 0, 1);
   leftWing.matrix.scale(0.07, 0.33, 0.5);
   leftWing.render();
 
@@ -235,23 +361,32 @@ function renderAllShapes() {
   head.color = [0.9, 0.9, 0.9, 1.0];
   head.matrix.translate(-0.15, 0.03, -0.6);
   head.matrix.rotate(0, 1, 0, 0);
-  head.matrix.scale(0.3, 0.43, 0.27);
+  head.matrix.scale(0.3001, 0.43, 0.27);
   head.render();
+
+  // Head Hair
+  var headHair = new Cube();
+  headHair.color = [1, 0, 0, 1]; 
+  headHair.matrix.translate(-.05, 0.1, -0.55);
+  headHair.matrix.rotate(0, 1, 0, 0);
+  headHair.matrix.scale(.1, .45, 0.3);
+  headHair.render();
 
   // Beak upper
   var beakUpper = new Cube();
   beakUpper.color = [1.0, 0.6, 0.0, 1.0];
-  beakUpper.matrix.translate(-.15, 0.23, -0.75);
+  beakUpper.matrix.translate(-.148, 0.23, -0.75);
   beakUpper.matrix.rotate(0, 1, 0, 0);
-  beakUpper.matrix.scale(0.2999, 0.05, 0.3);
+  beakUpper.matrix.scale(0.295, 0.05, 0.3);
   beakUpper.render();
 
   // Beak lower
   var beakLower = new Cube();
   beakLower.color = [0.8, 0.5, 0.0, 1.0];
-  beakLower.matrix.translate(-.15, 0.18, -0.75);
-  beakLower.matrix.rotate(0, 1, 0, 0);
-  beakLower.matrix.scale(0.2999, 0.05, 0.3);
+  beakLower.matrix.translate(-.148, 0.23, -0.45);
+  beakLower.matrix.rotate(180, 1, 0, 0);
+  beakLower.matrix.rotate(g_lowerBeakAngle, 1, 0, 0);
+  beakLower.matrix.scale(0.295, 0.05, 0.3);
   beakLower.render();
 
   // Gizzard
@@ -267,7 +402,7 @@ function renderAllShapes() {
   leftEye.color = [0.0, 0.0, 0.0, 1.0];
   leftEye.matrix.translate(-0.15, 0.28, -0.602);
   leftEye.matrix.rotate(0, 1, 0, 0);
-  leftEye.matrix.scale(0.08, 0.08, 0.01);
+  leftEye.matrix.scale(0.08, g_eyesScale, 0.01);
   leftEye.render();
 
   // Right eye
@@ -275,30 +410,8 @@ function renderAllShapes() {
   rightEye.color = [0.0, 0.0, 0.0, 1.0];
   rightEye.matrix.translate(.07, 0.28, -0.602);
   rightEye.matrix.rotate(0, 1, 0, 0);
-  rightEye.matrix.scale(0.08, 0.08, 0.01);
+  rightEye.matrix.scale(0.08, g_eyesScale, 0.01);
   rightEye.render();
-
-  // Draw a yellow arm
-  // var yellow = new Cube();
-  // yellow.color = [1.0, 1.0, 0.0, 1.0];
-  // yellow.matrix.setTranslate(0, -0.5, 0.0);
-  // yellow.matrix.rotate(-5, 1, 0, 0);
-
-  // yellow.matrix.rotate(g_yellowAngle, 0, 0, 1);
-  // var yellowCoordinatesMat = new Matrix4(yellow.matrix);
-  // yellow.matrix.scale(0.25, 0.7, 0.5);
-  // yellow.matrix.translate(-0.5, 0, 0);
-  // yellow.render();
-
-  // Purple box
-  // var box = new Cube();
-  // box.color = [1.0, 0.0, 1.0, 1.0];
-  // box.matrix = yellowCoordinatesMat;
-  // box.matrix.translate(0, .65, 0);
-  // box.matrix.rotate(-g_magentaAngle, 0, 0, 1);
-  // box.matrix.scale(0.3, 0.3, 0.3);
-  // box.matrix.translate(-0.5, 0, -0.001);
-  // box.render();
 
   var duration = performance.now() - startTime;
   sendTextToHTML("ms: " + Math.floor(duration) + " fps: " + Math.floor(1000/duration), "numdot");
@@ -319,36 +432,36 @@ function click(ev) {
   // Extract the event click and return it in WebGL coordinates
   let [x, y] = convertCoordinatesEventToGL(ev);
 
-  /// ChatGPT helped me with this math
-  let currentTime = performance.now();
-  let velocity = 0;
+  // /// ChatGPT helped me with this math
+  // let currentTime = performance.now();
+  // let velocity = 0;
 
-  if (g_lastMousePos && g_lastMouseTime) {
-    let dx = x - g_lastMousePos[0];
-    let dy = y - g_lastMousePos[1];
-    let dt = currentTime - g_lastMouseTime;
-    let dist = Math.sqrt(dx * dx + dy * dy);
-    velocity = dist / dt; // pixels/ms
-  }
+  // if (g_lastMousePos && g_lastMouseTime) {
+  //   let dx = x - g_lastMousePos[0];
+  //   let dy = y - g_lastMousePos[1];
+  //   let dt = currentTime - g_lastMouseTime;
+  //   let dist = Math.sqrt(dx * dx + dy * dy);
+  //   velocity = dist / dt; // pixels/ms
+  // }
 
-  g_lastMousePos = [x, y];
-  g_lastMouseTime = currentTime;
+  // g_lastMousePos = [x, y];
+  // g_lastMouseTime = currentTime;
 
-  // Create and store a new point object
-  let point;
-  if (g_seletcedType == POINT) {
-    point = new Point();
-  }
-  else if (g_seletcedType == TRIANGLE) {
-    point = new Triangle();
-  }
-  else if (g_seletcedType == CIRCLE) {
-    point = new Circle();
-    point.segments = g_seletcedSegment;
-  }
+  // // Create and store a new point object
+  // let point;
+  // if (g_seletcedType == POINT) {
+  //   point = new Point();
+  // }
+  // else if (g_seletcedType == TRIANGLE) {
+  //   point = new Triangle();
+  // }
+  // else if (g_seletcedType == CIRCLE) {
+  //   point = new Circle();
+  //   point.segments = g_seletcedSegment;
+  // }
 
-  point.position = [x, y];
-  point.timestamp = performance.now();
+  // point.position = [x, y];
+  // point.timestamp = performance.now();
 
   // Draw every shape that is supposed to be drawn
   renderAllShapes();

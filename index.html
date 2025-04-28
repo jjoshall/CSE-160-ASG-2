@@ -12,7 +12,12 @@
         <p><strong>jowihall@ucsc.edu</strong></p>
         <h3>Notes to Grader/Awesomeness Stuff!:</h3>
         <ul>
-          <li>Blah</li>
+          <li>Added animations to 9 different cubes.</li>
+          <li>Added third joint to the feet. (Joints: thigh -> calf -> foot)</li>
+          <li>Rotate the chicken using the mouse.</li>
+          <li>Shift-click the chicken for a special animation.</li>
+          <li>Perfomance indicators for ms and fps.</li>
+          <li>My machine was able to maintain above 400 fps at all times.</li>
         </ul>
     
     <canvas id="webgl" width="400" height="400">
@@ -20,20 +25,30 @@
     </canvas>
 
     <p id="numdot"> XXX </p>
-    
-    <button type="button" id="green">X</button>
-    <button type="button" id="red">X</button>
-    <button type="button" id="clearButton">X</button>
 
-    <br><br>
-    <button type="button" id="pointButton">X</button>
-    <button type="button" id="triangleButton">X</button>
-    <button type="button" id="circleButton">X</button>
-
+    Left Thigh <input type="range" min="-50" max="50" value="0" class="slider" id="leftThighSlide">
+    Left Calf <input type="range" min="0" max="35" value="0" class="slider" id="leftCalfSlide">
+    Left Leg Animation:
+    <button type="button" id="animationLeftLegOnButton">On</button>
+    <button type="button" id="animationLeftLegOffButton">Off</button>
     <p>
-    X <input type="range" min="0" max="100" value="100" class="slider" id="redSlide">
+    Left Foot <input type="range" min="-10" max="0" value="0" class="slider" id="leftFootSlide">
+    Animation:
+    <button type="button" id="animationLeftFootOnButton">On</button>
+    <button type="button" id="animationLeftFootOffButton">Off</button>
     <p>
-    Lower Beak <input type="range" min="-45" max="45" value="0" class="slider" id="lowerBeakSlide">
+    Right Thigh <input type="range" min="-50" max="50" value="0" class="slider" id="rightThighSlide">
+    Right Calf <input type="range" min="0" max="35" value="0" class="slider" id="rightCalfSlide">
+    Right Leg Animation:
+    <button type="button" id="animationRightLegOnButton">On</button>
+    <button type="button" id="animationRightLegOffButton">Off</button>
+    <p>
+    Right Foot <input type="range" min="-10" max="0" value="0" class="slider" id="rightFootSlide">
+    Animation:
+    <button type="button" id="animationRightFootOnButton">On</button>
+    <button type="button" id="animationRightFootOffButton">Off</button>
+    <p>    
+    Lower Beak <input type="range" min="-5" max="0" value="0" class="slider" id="lowerBeakSlide">
     Animation: 
     <button type="button" id="animationLowerBeakOnButton">On</button>
     <button type="button" id="animationLowerBeakOffButton">Off</button>
@@ -42,10 +57,6 @@
     Animation: 
     <button type="button" id="animationWingsOnButton">On</button>
     <button type="button" id="animationWingsOffButton">Off</button>
-
-    <p>
-    Camera Angle <input type="range" min="0" max="90" value="5" class="slider" id="angleSlide">
-    <p>
 
     <script src="ASG2/lib/webgl-utils.js"></script>
     <script src="ASG2/lib/webgl-debug.js"></script>

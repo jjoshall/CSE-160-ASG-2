@@ -28,5 +28,17 @@ class Cube {
         // Right side of cube
         drawTriangle3D( [1.0, 0.0, 0.0,  1.0, 1.0, 1.0,  1.0, 0.0, 1.0] );
         drawTriangle3D( [1.0, 0.0, 0.0,  1.0, 1.0, 0.0,  1.0, 1.0, 1.0] );
+
+        // Left side of cube
+        drawTriangle3D( [0.0, 0.0, 1.0,  0.0, 1.0, 1.0,  0.0, 1.0, 0.0] );
+        drawTriangle3D( [0.0, 0.0, 1.0,  0.0, 1.0, 0.0,  0.0, 0.0, 0.0] );
+
+        // Back of cube
+        drawTriangle3D( [0.0, 0.0, 1.0,  1.0, 0.0, 1.0,  1.0, 1.0, 1.0] );
+        drawTriangle3D( [0.0, 0.0, 1.0,  1.0, 1.0, 1.0,  0.0, 1.0, 1.0] );
+
+        // Bottom of cube
+        drawTriangle3D( [0.0, 0.0, 1.0,  1.0, 0.0, 1.0,  1.0, 0.0, 0.0] );
+        drawTriangle3D( [0.0, 0.0, 1.0,  1.0, 0.0, 0.0,  0.0, 0.0, 0.0] );
     }
 }

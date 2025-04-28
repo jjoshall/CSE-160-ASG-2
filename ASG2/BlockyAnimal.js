@@ -270,6 +270,7 @@ function renderAllShapes() {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.clear(gl.COLOR_BUFFER_BIT);
 
+  /// ChatGPT helped me make sure the ground wouldn't rotate
   var identityM = new Matrix4();
   gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, identityM.elements);
 

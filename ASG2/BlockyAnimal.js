@@ -171,8 +171,8 @@ function main() {
     if (g_isDragging) {
       let dx = ev.clientX - g_lastMouseX;
       let dy = ev.clientY - g_lastMouseY;
-      g_globalAngleX += (dx * 0.5);
-      g_globalAngleY += (dy * 0.5);
+      g_globalAngleX -= (dx * 0.5);
+      g_globalAngleY -= (dy * 0.5);
 
       g_globalAngleY = Math.max(-90, Math.min(90, g_globalAngleY));
 
@@ -183,7 +183,7 @@ function main() {
   });
 
   // Specify the color for clearing <canvas>
-  gl.clearColor(0, 0, 0.5, 0.2);
+  //gl.clearColor(0, 0, 0.5, 0.2);
 
   requestAnimationFrame(tick); // Start the tick function
 }
@@ -269,6 +269,21 @@ function renderAllShapes() {
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.clear(gl.COLOR_BUFFER_BIT);
+
+  var identityM = new Matrix4();
+  gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, identityM.elements);
+
+  // Ground
+  var ground = new Cube();
+  ground.color = [0.0, 0.4, 0.0, 1];
+  ground.matrix.translate(-2.0, -2.71, .5);
+  ground.matrix.rotate(0, 1, 0, 0);
+  ground.matrix.scale(100.0, 2, 0.0);
+  ground.render();
+
+  var globalRotMat = new Matrix4().rotate(g_globalAngleX, 0, 1, 0);
+  globalRotMat.rotate(g_globalAngleY, 1, 0, 0);
+  gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
   // Left thigh
   var leftThigh = new Cube();

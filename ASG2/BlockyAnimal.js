@@ -143,6 +143,8 @@ function main() {
   //Set up GLSL shaders and connect variables to GLSL
   connectVariablesToGLSL();
 
+  initTriangle3DBuffer(); // Initialize the buffer for 3D triangles
+
   // Set up actions for HTML UI
   addActionsForHtmlUI();
 

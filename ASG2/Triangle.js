@@ -48,15 +48,19 @@ function drawTriangle(vertices) {
     gl.drawArrays(gl.TRIANGLES, 0, n); // Draw the rectangle
 }
 
-function drawTriangle3D(vertices) {
-    var n = 3; // The number of vertices
-  
+var vertexBuffer = null;
+
+function initTriangle3DBuffer() {
     // Create a buffer object
-    var vertexBuffer = gl.createBuffer();
+    vertexBuffer = gl.createBuffer();
     if (!vertexBuffer) {
       console.log('Failed to create the buffer object');
       return -1;
     }
+}
+
+function drawTriangle3D(vertices) {
+    var n = 3; // The number of vertices
   
     // Bind the buffer object to target
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);

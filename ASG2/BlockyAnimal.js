@@ -286,6 +286,13 @@ function renderAllShapes() {
   globalRotMat.rotate(g_globalAngleY, 1, 0, 0);
   gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
+  var myCone = new Cone();
+  myCone.color = [1, 0, 0, 1.0];
+  myCone.matrix.translate(0, .3, -.5);
+  myCone.matrix.rotate(70, 1, 0, 0);
+  myCone.matrix.scale(0.1, 0.3, 0.3);
+  myCone.render();
+
   // Left thigh
   var leftThigh = new Cube();
   leftThigh.color = [0.9, 0.7, 0, 1.0];
@@ -379,14 +386,6 @@ function renderAllShapes() {
   head.matrix.rotate(0, 1, 0, 0);
   head.matrix.scale(0.3001, 0.43, 0.27);
   head.render();
-
-  // Head Hair
-  var headHair = new Cube();
-  headHair.color = [1, 0, 0, 1]; 
-  headHair.matrix.translate(-.05, 0.1, -0.55);
-  headHair.matrix.rotate(0, 1, 0, 0);
-  headHair.matrix.scale(.1, .45, 0.3);
-  headHair.render();
 
   // Beak upper
   var beakUpper = new Cube();
